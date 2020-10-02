@@ -1,0 +1,67 @@
+# http://docs.docker.jp/compose/rails.html
+# https://hub.docker.com/_/mysql/
+version: '3.7'
+
+networks:
+  default:
+    name: docker-lan
+
+services:
+
+  localstack:
+    image: localstack/localstack
+    environment:
+      DEFAULT_REGION: ap-notrheast-1
+      HOSTNAME: localstack
+      HOSTNAME_EXTERNAL: localstack
+      DATA_DIR: /tmp/localstack/data
+      SERVICES: serverless
+    volumes:
+      - ./localstack:/tmp/localstack
+
+  dynamodb-admin:
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/dynamodb-admin.Dockerfile
+    command: dynamodb-admin
+    ports:
+      - '5001:8001'
+    depends_on:
+      - localstack
+    environment:
+      DYNAMO_ENDPOINT: http://localstack:4566
+      AWS_REGION: ap-notrheast-1
+
+  sam:
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/sam.Dockerfile
+    container_name: sam
+    command: bash -c 'sam local start-api --host 0.0.0.0 --docker-network docker-lan'
+    ports:
+      - '3030:3000'
+    # depends_on:
+    #   - localstack
+    environment:
+      SAM_DOCKER_VOLUME_BASEDIR: ${PWD}/sam
+    env_file:
+      - ./Envfiles/sam.env
+    volumes:
+      - ./sam:/app:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    tty: true
+
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/node.Dockerfile
+    container_name: web
+    command: bash -c 'yarn start --host 0.0.0.0'
+    ports:
+      - '8000:3000'
+    env_file:
+      - ./Envfiles/web.env
+    volumes:
+      - ./web:/app:cached
+      - ./web/node_modules:/app/node_modules
+    tty: true

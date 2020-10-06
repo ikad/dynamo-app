@@ -1,6 +1,5 @@
 .DS_Store
 
 localstack
-web/node_modules
 
 Envfiles/*.env

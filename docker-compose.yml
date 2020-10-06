@@ -32,23 +32,26 @@ services:
       DYNAMO_ENDPOINT: http://localstack:4566
       AWS_REGION: ap-notrheast-1
 
-  sam:
+  api:
     build:
       context: .
-      dockerfile: ./Dockerfiles/sam.Dockerfile
-    container_name: sam
-    command: bash -c 'sam local start-api --host 0.0.0.0 --docker-network docker-lan'
+      dockerfile: ./Dockerfiles/ruby.Dockerfile
+    container_name: api
     ports:
-      - '3030:3000'
-    # depends_on:
-    #   - localstack
+      - '3000:3000'
+    # command: bash -c 'bundle exec jets server --host 0.0.0.0 --port 3000'
     environment:
-      SAM_DOCKER_VOLUME_BASEDIR: ${PWD}/sam
+      LANG: C.UTF-8
+      EDITOR: vim
+      BUNDLE_APP_CONFIG: /app/.bundle
     env_file:
-      - ./Envfiles/sam.env
+      - ./Envfiles/api.env
+    # depends_on:
+      # - postgres
+      # - mysql
     volumes:
-      - ./sam:/app:cached
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./api:/app:cached
+      - ./api/bundle:/app/bundle
     tty: true
 
   web:

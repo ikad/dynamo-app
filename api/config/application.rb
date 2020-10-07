@@ -12,7 +12,7 @@ Jets.application.configure do
 
   # config.asset_base_url = 'https://cloudfront.domain.com/assets' # example
 
-  # config.cors = true # for '*'' # defaults to false
+  config.cors = true # for '*'' # defaults to false
   # config.cors = '*.mydomain.com' # for specific domain
 
   # config.function.timeout = 30 # defaults to 30

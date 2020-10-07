@@ -46,9 +46,8 @@ services:
       BUNDLE_APP_CONFIG: /app/.bundle
     env_file:
       - ./Envfiles/api.env
-    # depends_on:
-      # - postgres
-      # - mysql
+    depends_on:
+      - localstack
     volumes:
       - ./api:/app:cached
       - ./api/bundle:/app/bundle

@@ -23,8 +23,11 @@ class CommentsController < ApplicationController
   # POST /comments
   def create
     @comment = Comment.new
+    @comment.create(comment_params)
 
-    if @comment.create(comment_params, params[:article_id])
+    if @comment.create(comment_params)
+      article = Article.find(params[:article_id])
+      ArticleComment.new.create({ id: article.id, sk: @comment.id })
       render json: @comment, status: :created
     else
       render json: @comment.errors, status: :unprocessable_entity
@@ -42,7 +45,7 @@ class CommentsController < ApplicationController
 
   # DELETE /comments/1
   def delete
-    @comment.destroy({ title: nil, body: nil })
+    @comment.destroy({ body: nil })
     render json: {deleted: true}
   end
 
